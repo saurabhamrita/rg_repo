@@ -1,0 +1,23 @@
+$csvFile = "$(Build.SourcesDirectory)\Book1.csv"
+$tfvarsFile = "$(Build.SourcesDirectory)\terraform.tfvars"
+
+$data = Import-Csv $csvFile
+
+$tfvarsContent = "resource_groups = {`n"
+
+foreach ($row in $data) {
+
+    $rgName = $row.Name.Trim()
+    $location = $row.Location.Trim()
+
+    $tfvarsContent += "  `"$rgName`" = {`n"
+    $tfvarsContent += "    location = `"$location`"`n"
+    $tfvarsContent += "  }`n"
+}
+
+$tfvarsContent += "}`n"
+
+Set-Content -Path $tfvarsFile -Value $tfvarsContent -Encoding UTF8
+
+Write-Host "terraform.tfvars generated successfully:"
+Get-Content $tfvarsFile
